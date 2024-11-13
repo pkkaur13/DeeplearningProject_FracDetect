@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bone Fracture Classification</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        input[type="file"] { margin-top: 20px; }
+        .result { margin-top: 20px; font-size: 1.2em; }
+        .confidence { color: green; }
+    </style>
+</head>
+<body>
+    <h1>Upload X-ray for Fracture Classification</h1>
+    <form id="uploadForm">
+        <input type="file" id="fileInput" accept="image/*" required>
+        <button type="button" onclick="submitImage()">Submit</button>
+    </form>
+    <div class="result" id="result"></div>
+    
+    <script>
+        function submitImage() {
+            const fileInput = document.getElementById('fileInput');
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = "Processing...";
+    
+            if (fileInput.files.length === 0) {
+                resultDiv.innerHTML = "Please select a file.";
+                return;
+            }
+    
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+    
+            fetch('/predict', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    resultDiv.innerHTML = `<span style="color: red;">Error: ${data.error}</span>`;
+                } else {
+                    resultDiv.innerHTML = `Result: <strong>${data.label}</strong><br>Confidence: <span class="confidence">${data.confidence.toFixed(2)}</span>`;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                resultDiv.innerHTML = "An error occurred.";
+            });
+        }
+    </script>
+    
+</body>
+</html>
